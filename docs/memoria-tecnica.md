@@ -55,6 +55,11 @@ En el diagrama ER (adjunto en la memoria) se representan:
 - Entidad `Cliente` conectada con `Presupuesto` mediante una relación 1:N.
 - Entidad `Presupuesto` conectada con `ViniloConfig` mediante una relación 1:N.
 
+![Diagrama ER del modelo de datos](./DiagramaER.png)
+
+_Figura 1. Diagrama entidad–relación del modelo de datos del backend._
+
+
 ### Justificación del diseño
 
 Se ha optado por separar el modelo en tres entidades para cumplir mejor los principios de normalización y reflejar el dominio real:
