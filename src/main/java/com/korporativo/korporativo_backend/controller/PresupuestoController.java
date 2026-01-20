@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/presupuestos")
-@CrossOrigin(origins = "*")
 public class PresupuestoController {
 
     private final PresupuestoService presupuestoService;

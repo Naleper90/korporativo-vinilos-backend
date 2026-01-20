@@ -3,9 +3,9 @@ package com.korporativo.korporativo_backend.config;
 import com.korporativo.korporativo_backend.model.Role;
 import com.korporativo.korporativo_backend.model.User;
 import com.korporativo.korporativo_backend.repository.UserRepository;
+import com.korporativo.korporativo_backend.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -28,6 +29,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .requiresChannel(channel -> channel.anyRequest().requiresInsecure())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Swagger y H2 abiertos
@@ -37,19 +39,31 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/h2-console/**"
                         ).permitAll()
-                        // futuros endpoints públicos de auth
-                        .requestMatchers("/auth/**").permitAll()
+                        // Login endpoint público (sin autenticación)
+                        .requestMatchers("/auth/login").permitAll()
                         // Toda la API requiere estar autenticado
                         .requestMatchers("/api/**").authenticated()
                         // Lo demás se permite
                         .anyRequest().permitAll()
                 )
-                .httpBasic(Customizer.withDefaults());
+                // Agregar JWT Filter (antes que UsernamePasswordAuthenticationFilter)
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         // H2 console
-        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
+        http.headers(headers -> headers
+                .frameOptions(frame -> frame.disable())
+                .httpStrictTransportSecurity(hsts -> hsts.disable())
+        );
 
         return http.build();
+    }
+
+    /**
+     * Bean para el filtro JWT
+     */
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter();
     }
 
     @Bean

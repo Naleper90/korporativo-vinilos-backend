@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/vinilos")
-@CrossOrigin(origins = "*")
 public class ViniloConfigController {
 
     private final ViniloConfigService viniloConfigService;
